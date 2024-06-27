@@ -4,9 +4,43 @@ import { User } from '../models/User.js'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 import authMiddleware from '../middleware/auth.js'
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+
+const __dirname = path.resolve();
+const uploadsDir = path.join(__dirname, 'uploads');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png/;
+    const mimeType = allowedTypes.test(file.mimetype);
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimeType && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only .jpeg, .jpg and .png files are allowed!'));
+    }
+  },
+  limits: { fileSize: 1024 * 1024 * 2 } // 2MB
+});
 
 
 const router = express.Router()
+
+
 
 router.post('/signup', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -128,7 +162,26 @@ router.get('/me', authMiddleware, async (req, res) => {
       res.status(500).json({ message: 'Server error' });
     }
   });
-  
-  
 
+  router.put('/me', authMiddleware, upload.single('avatar'), async (req, res, next) => {
+    const { phone, address } = req.body;
+    const avatar = req.file ? `/uploads/${req.file.filename}` : null;
+  
+    try {
+      const updateData = {};
+      if (phone) updateData.phone = phone;
+      if (address) updateData.address = address;
+      if (avatar) updateData.avatar = avatar;
+  
+      const user = await User.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('-password');
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.json({ user, message: 'Profile updated successfully' });
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  });
+  
 export {router as UserRouter}

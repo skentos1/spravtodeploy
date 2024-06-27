@@ -7,10 +7,13 @@ import 'dotenv/config';
 import { UserRouter } from './routes/pouzivatel.js';
 import { JobRouter } from './routes/praca.js';
 import authMiddleware from './middleware/auth.js';
+import path from 'path';
+import fs from 'fs';
 
 dotenv.config();
 
 const app = express();
+
 
 mongoose.connect('mongodb://127.0.0.1:27017/startup')
     .then(() => console.log('Connected to MongoDB'))
@@ -23,7 +26,14 @@ app.use(cors({
     credentials: true
 }));
 
+const __dirname = path.resolve();
+const uploadsDir = path.join(__dirname, 'uploads');
 
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+app.use('/uploads', express.static(uploadsDir));
 app.use('/auth', UserRouter);
 app.use('/api/jobs', JobRouter);
 app.use('/api/user', UserRouter);
