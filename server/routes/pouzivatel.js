@@ -109,6 +109,7 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
@@ -120,17 +121,20 @@ router.post("/login", async (req, res) => {
       return res.json({ status: false, message: "Nesprávne heslo" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.KEY, {
-      expiresIn: "5h",
-    });
+    const token = jwt.sign({ id: user._id }, process.env.KEY, { expiresIn: "5h" });
+
+    // Nastav cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,//process.env.NODE_ENV === "production",
-      sameSite: "none",
-      path: "/", // Ensure the path matches the clearCookie method
-      maxAge: 5 * 60 * 60 * 1000, // 5 hours
+      secure:true, //process.env.NODE_ENV === "production", // Render HTTPS
+      sameSite: "None",
+      path: "/",
+      maxAge: 5 * 60 * 60 * 1000,
     });
+
+    // Vráť aj JSON s tokenom
     return res.json({ status: true, token, message: "Prihlásenie úspešné" });
+
   } catch (error) {
     console.error(error);
     return res.json({ status: false, message: "Prihlásenie zlyhalo" });
