@@ -1,0 +1,22 @@
+.profile-enter {
+    max-height: 0;
+    opacity: 0;
+  }
+  .profile-enter-active {
+    max-height: 200px; /* adjust as necessary */
+    opacity: 1;
+    transition: max-height 300ms ease-in, opacity 300ms ease-in;
+  }
+  .profile-exit {
+    max-height: 200px; /* adjust as necessary */
+    opacity: 1;
+  }
+  .profile-exit-active {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 300ms ease-out, opacity 300ms ease-out;
+  }
+  .animated-div {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+  }
+  
