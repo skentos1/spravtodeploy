@@ -42,7 +42,8 @@ app.use(
       "http://localhost:5173",
       process.env.FRONTEND_BASE_URL,
       "https://lj5p5fw1-5173.euw.devtunnels.ms",
-      "https://spravtozamna.onrender.com",
+      "https://www.spravtozamna.eu", // produkcia www
+      "https://spravtozamna.eu",  
     ], // Add production URL when you deploy the frontend
     credentials: true,
   })
